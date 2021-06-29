@@ -27,11 +27,12 @@ class MaxTicTacToeGame(Game):
         return (b.state, -player)
     
     def getValidMoves(self, board, player):
-        b = Board((self.n, self.n))
+        b = Board(self.n, self.n)
         b.state = np.copy(board)
         valids = [0]*self.getActionSize()
         moves = b.get_available_moves()
         if len(moves) == 0:
+            print('we ever get in here?')
             return np.asarray(valids)
         for move in moves:
             valids[move[0]*self.n + move[1]] = 1
@@ -43,6 +44,8 @@ class MaxTicTacToeGame(Game):
         is_over, who_won = b.game_over()
         if not is_over:
             return 0
+        if who_won is None:
+            return 1e-4
         return 1 if who_won else -1
 
     def getCanonicalForm(self, board, player):
@@ -51,8 +54,8 @@ class MaxTicTacToeGame(Game):
     
     def getSymmetries(self, board, pi): #not changing
         # mirror, rotational
-        assert(len(pi) == self.n**2+1)  # 1 for pass
-        pi_board = np.reshape(pi[:-1], (self.n, self.n))
+        assert(len(pi) == self.n**2)  # 1 for pass
+        pi_board = np.reshape(pi[:], (self.n, self.n))
         l = []
 
         for i in range(1, 5):
@@ -62,9 +65,22 @@ class MaxTicTacToeGame(Game):
                 if j:
                     newB = np.fliplr(newB)
                     newPi = np.fliplr(newPi)
-                l += [(newB, list(newPi.ravel()) + [pi[-1]])]
+                l += [(newB, list(newPi.ravel()))]
         return l
     
+    def stringRepresentation(self, board):
+        # 8x8 numpy array (canonical board)
+        return board.tostring()
+    
+    @staticmethod
+    def display(board):
+        n = board.shape[0]
+        for i in range(n):
+            l = '| '
+            for j in range(n):
+                piece = 'X' if board[i][j] == 1 else 'O' if board[i][j] == -1 else '-'
+                l += f'{piece} | '
+            print(l)
 
 
 class Board():

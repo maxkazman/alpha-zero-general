@@ -3,8 +3,10 @@ import logging
 import coloredlogs
 
 from Coach import Coach
-from max_tictactoe.tictactoe import MaxTicTacToeGame
-from max_tictactoe.NNet import NNetWrapper as nn
+from ultimate_tictactoe.ultimate_ttt import UltimateTTT
+from ultimate_tictactoe.NNet import NNetWrapper as nn
+# from max_tictactoe.tictactoe import MaxTicTacToeGame
+# from max_tictactoe.NNet import NNetWrapper as nn
 # from tictactoe.TicTacToeGame import TicTacToeGame
 # from tictactoe.keras.NNet import NNetWrapper as nn
 # from othello.OthelloGame import OthelloGame as Game
@@ -34,8 +36,8 @@ args = dotdict({
 
 
 def main():
-    log.info('Loading %s...', MaxTicTacToeGame.__name__)
-    g = MaxTicTacToeGame()
+    log.info('Loading %s...', UltimateTTT.__name__)
+    g = UltimateTTT()
     #g = Game(6)
 
     log.info('Loading %s...', nn.__name__)

@@ -40,7 +40,7 @@ class UltimateTTT(Game):
         return np.asarray(valids)
 
     def getGameEnded(self, board, player):
-        if not isinstance(board, Board()):
+        if not isinstance(board, Board):
             b = Board()
             b.state = np.copy(board)
             b.update_meta()

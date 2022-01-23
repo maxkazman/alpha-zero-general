@@ -40,9 +40,11 @@ class UltimateTTT(Game):
         return np.asarray(valids)
 
     def getGameEnded(self, board, player):
-        # b = Board()
-        # b.state = np.copy(board)
-        # b.update_meta()
+        if not isinstance(board, Board()):
+            b = Board()
+            b.state = np.copy(board)
+            b.update_meta()
+            return b.is_game_over()
         return board.is_game_over()
 
     def getCanonicalForm(self, board, player):

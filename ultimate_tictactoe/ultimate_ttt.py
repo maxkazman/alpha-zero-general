@@ -11,7 +11,7 @@ class UltimateTTT(Game):
     
     def getInitBoard(self):
         b = Board()
-        return b.state
+        return b
 
     def getBoardSize(self):
         return (self.n*self.n, self.n*self.n)
@@ -20,11 +20,11 @@ class UltimateTTT(Game):
         return self.n**4 #3^4 = 81
 
     def getNextState(self, board, player, action):
-        b = Board()
-        b.state = np.copy(board)
-        b.update_meta()
-        b.make_move((int(action/9), action%9), player)
-        return (b.state, -player)
+        # b = Board()
+        # b.state = np.copy(board)
+        # b.update_meta()
+        board.make_move((int(action/9), action%9), player)
+        return (board, -player)
 
     def getValidMoves(self, board, player):
         b = Board()
@@ -40,13 +40,13 @@ class UltimateTTT(Game):
         return np.asarray(valids)
 
     def getGameEnded(self, board, player):
-        b = Board()
-        b.state = np.copy(board)
-        b.update_meta()
-        return b.is_game_over()
+        # b = Board()
+        # b.state = np.copy(board)
+        # b.update_meta()
+        return board.is_game_over()
 
     def getCanonicalForm(self, board, player):
-        return player*board
+        return player*board.state
 
     def getSymmetries(self, board, pi): #not changing
         # mirror, rotational
@@ -68,11 +68,17 @@ class UltimateTTT(Game):
         # 8x8 numpy array (canonical board)
         return board.tostring()
 
+    def evaluate_board(self, board):
+        # b = Board()
+        # b.state = np.copy(board)
+        # b.meta_state = np.copy(meta)
+        return board.evaluate()
+
     @staticmethod
     def display(board):
-        b = Board()
-        b.state = board
-        b.display()
+        # b = Board()
+        # b.state = board
+        board.display()
 
 class Board():
     def __init__(self):
@@ -121,7 +127,7 @@ class Board():
         meta_coord = (int(move[0]/3), int(move[1]/3))
         minigame_result = self.minigame_is_over(meta_coord)
         if minigame_result != 0:
-            self.meta_state[meta_coord[0], meta_coord[1]] = minigame_result        
+            self.meta_state[meta_coord[0], meta_coord[1]] = minigame_result
     
     def update_meta(self):
         for x in range(3):
@@ -153,6 +159,35 @@ class Board():
         
         return 0 #can still play
     
+    def evaluate(self):
+
+        score = 0
+        for i in range(self.connect**2):
+            row = i//3
+            col = i%3
+            if self.meta_state[row, col] == 0:
+                mini_game = np.copy(self.state[row*3:(row+1)*3, col*3:(col+1)*3])
+                mini_game[np.absolute(mini_game) == 2] /= 2
+                score += self.evaluate_subgame(mini_game, 1) - self.evaluate_subgame(mini_game, -1)
+                #print(f'score for {row}, {col}: {self.evaluate_subgame(mini_game, 1) - self.evaluate_subgame(mini_game, -1)}')
+                
+
+        score += 10*self.evaluate_subgame(self.meta_state, 1) - 10*self.evaluate_subgame(self.meta_state, -1)
+        return score
+            
+
+    def evaluate_subgame(self, game, player):
+        score = 0
+        for kernal in self.detection_kernels:
+                sub_score_1 = convolve2d(game == player, kernal, mode="valid") #optionally *2 this
+                sub_score_0 = convolve2d(game == 0, kernal, mode="valid")
+                #print(f'subscore1: {sub_score_1}')
+                #print(f'subscore0: {sub_score_0}')
+                combined_score = sub_score_1[sub_score_1+sub_score_0 == 3]
+                #print(combined_score)
+                score += np.sum(combined_score)
+        return score
+
     @staticmethod
     def convert_coord(coord):
         x, y = coord
@@ -174,3 +209,16 @@ class Board():
             if i==3 or i==6:
                 print('='*21)
             print(l)
+
+# b = Board()
+# arr = np.zeros((9,9))
+# arr[0,0] = 1
+# arr[0,1] = 1
+# arr[0,2] = -1
+# arr[2, 1] = -1
+# arr[1,1] = 1
+# arr[2,2] = 1
+# arr[6,6] = -1
+# print(arr)
+# b.state = arr
+# print(b.evaluate())

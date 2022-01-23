@@ -20,9 +20,11 @@ class UltimateTTT(Game):
         return self.n**4 #3^4 = 81
 
     def getNextState(self, board, player, action):
-        # b = Board()
-        # b.state = np.copy(board)
-        # b.update_meta()
+        if not isinstance(board, Board):
+            b = Board()
+            b.state = np.copy(board)
+            b.update_meta()
+            board = b
         board.make_move((int(action/9), action%9), player)
         return (board, -player)
 

@@ -5,6 +5,9 @@ from collections import deque
 from pickle import Pickler, Unpickler
 from random import shuffle
 
+from joblib import Parallel, delayed
+import multiprocessing
+
 import numpy as np
 from tqdm import tqdm
 
@@ -50,6 +53,8 @@ class Coach():
         self.curPlayer = 1
         episodeStep = 0
 
+        # self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
+
         while True:
             episodeStep += 1
             canonicalBoard = self.game.getCanonicalForm(board, self.curPlayer)
@@ -88,6 +93,10 @@ class Coach():
                     self.mcts = MCTS(self.game, self.nnet, self.args)  # reset search tree
                     iterationTrainExamples += self.executeEpisode()
 
+                # iterationTrainExamples = Parallel(n_jobs=3)(delayed(self.executeEpisode)() for _ in range(self.args.numEps))
+
+                # print(f'shape of iterationTrainExamples: {len(iterationTrainExamples)}, {len(iterationTrainExamples[0])}')
+
                 # save the iteration examples to the history 
                 self.trainExamplesHistory.append(iterationTrainExamples)
 
@@ -109,9 +118,6 @@ class Coach():
             self.nnet.save_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             self.pnet.load_checkpoint(folder=self.args.checkpoint, filename='temp.pth.tar')
             pmcts = MCTS(self.game, self.pnet, self.args)
-
-            print(f'TRAIN EXAMPLES HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! :')
-            print(trainExamples)
 
             self.nnet.train(trainExamples)
             nmcts = MCTS(self.game, self.nnet, self.args)

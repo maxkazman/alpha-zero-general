@@ -52,7 +52,6 @@ class MCTS():
         probs = [x / counts_sum for x in counts]
         return probs
 
-    @profile
     def search(self, canonicalBoard):
         """
         This function performs one iteration of MCTS. It is recursively called

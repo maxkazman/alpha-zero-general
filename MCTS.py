@@ -25,7 +25,6 @@ class MCTS():
         self.Es = {}  # stores game.getGameEnded ended for board s
         self.Vs = {}  # stores game.getValidMoves for board s
 
-    @profile
     def getActionProb(self, canonicalBoard, temp=1):
         """
         This function performs numMCTSSims simulations of MCTS starting from
@@ -53,6 +52,7 @@ class MCTS():
         probs = [x / counts_sum for x in counts]
         return probs
 
+    @profile
     def search(self, canonicalBoard):
         """
         This function performs one iteration of MCTS. It is recursively called
